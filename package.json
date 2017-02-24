@@ -1,0 +1,13 @@
+{
+  "name" : "YSV-Server",
+  "version" : "0.1.0",
+  "description": "Self-contained templating engine",
+  "main": "app.js",
+  "author": {
+    "name": "Daniel Shelepov",
+    "email": "ds_outer@outlook.com"
+  },
+  "dependencies" : {
+    "express" : "^4.9.7"
+  }
+}

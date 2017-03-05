@@ -65,8 +65,9 @@
 
     loadPage("example_page.html");
 
-    // TODO: in HTTP server, if not served by AJAX, redirect to index with arg
+    // TODO: on page, listen to page arg and load it
     // TODO: intercept navigate away and reload instead
     // TODO: bw compat with existing pages (graceful on non-tempates)
     // ???TODO: listen to hash changes
+    // TODO: make sure styles are unloaded/reloaded correctly
 })();

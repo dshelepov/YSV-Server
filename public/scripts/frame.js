@@ -10,6 +10,32 @@
         $("html")[0].innerHTML = html;
     }
 
+    function initialize() {
+        $(window).bind('hashchange', onHashChange);
+
+        $("html").on("click", "a", function () {
+            function isLinkInternal(element) {
+                return (element.host === window.location.host);
+            }
+
+            if (isLinkInternal(this)) {
+                var lowerPath = this.pathname.toLower();
+
+                if (lowerPath.endsWith(".html") || lowerPath.endsWith(".htm")) {
+                    $.uriAnchor.setAnchor({
+                        page: this.pathname
+                    });
+
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        onHashChange();
+    }
+
     function loadTemplate(url, model) {
         url = url + "?" + Math.random();
         $.get(url, function (data) {
@@ -63,11 +89,19 @@
         });
     }
 
-    loadPage("example_page.html");
+    function onHashChange() {
+        var anchorMap = $.uriAnchor.makeAnchorMap();
 
-    // TODO: on page, listen to page arg and load it
-    // TODO: intercept navigate away and reload instead
+        if (typeof anchorMap.page !== "undefined") {
+            loadPage(anchorMap.page);
+        }
+    }
+
+    initialize();
+
+    // TODO: don't reload if same page
     // TODO: bw compat with existing pages (graceful on non-tempates)
-    // ???TODO: listen to hash changes
     // TODO: make sure styles are unloaded/reloaded correctly
+    // TODO: nested templates
+    // TODO: demo
 })();

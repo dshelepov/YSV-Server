@@ -2,6 +2,8 @@
 {
     'use strict';
 
+    var currentPageLoaded = null;
+
     function replaceAll(input, search, replace) {
         return input.split(search).join(replace);
     }
@@ -13,24 +15,22 @@
     function initialize() {
         $(window).bind('hashchange', onHashChange);
 
-        $("html").on("click", "a", function () {
+        $("html").on("click", "a", function (event) {
             function isLinkInternal(element) {
                 return (element.host === window.location.host);
             }
 
             if (isLinkInternal(this)) {
-                var lowerPath = this.pathname.toLower();
+                var lowerPath = this.pathname.toLowerCase();
 
                 if (lowerPath.endsWith(".html") || lowerPath.endsWith(".htm")) {
-                    $.uriAnchor.setAnchor({
-                        page: this.pathname
-                    });
+                    event.preventDefault();
 
-                    return false;
+                    $.uriAnchor.setAnchor({
+                        page: this.pathname.substr(1)   // remove leading '/'
+                    });
                 }
             }
-
-            return true;
         });
 
         onHashChange();
@@ -86,20 +86,23 @@
             } else {
                 reloadDocument('ERROR: could not find ' + templateKey + ' on page ' + url);
             }
+        }).fail(function () {
+            reloadDocument('ERROR: resource ' + url + " not found.");
         });
     }
 
     function onHashChange() {
         var anchorMap = $.uriAnchor.makeAnchorMap();
+        var newPage = anchorMap.page;
 
-        if (typeof anchorMap.page !== "undefined") {
-            loadPage(anchorMap.page);
+        if (typeof newPage !== "undefined" && newPage !== currentPageLoaded) {
+            loadPage(newPage);
+            currentPageLoaded = newPage;
         }
     }
 
     initialize();
 
-    // TODO: don't reload if same page
     // TODO: bw compat with existing pages (graceful on non-tempates)
     // TODO: make sure styles are unloaded/reloaded correctly
     // TODO: nested templates

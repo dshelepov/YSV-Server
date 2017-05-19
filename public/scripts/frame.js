@@ -13,8 +13,6 @@
     }
 
     function initialize() {
-        $(window).bind('hashchange', onHashChange);
-
         $("html").on("click", "a", function (event) {
             function isLinkInternal(element) {
                 return (element.host === window.location.host);
@@ -25,15 +23,20 @@
 
                 if (lowerPath.endsWith(".html") || lowerPath.endsWith(".htm")) {
                     event.preventDefault();
-
-                    $.uriAnchor.setAnchor({
-                        page: this.pathname.substr(1)   // remove leading '/'
-                    });
+                    navigatePush(this.pathname);
                 }
             }
         });
 
-        onHashChange();
+        window.onpopstate = function (event) {
+            navigate(document.location.pathname);
+        };
+
+        var anchorMap = $.uriAnchor.makeAnchorMap();
+        var newPage = anchorMap.page;
+        if (typeof newPage === "string" && newPage !== currentPageLoaded) {
+            navigateReplace(newPage);
+        }
     }
 
     function loadTemplate(url, model) {
@@ -84,26 +87,39 @@
             if (typeof vars[templateKey] !== "undefined") {
                 loadTemplate(vars[templateKey], vars);
             } else {
-                reloadDocument('ERROR: could not find ' + templateKey + ' on page ' + url);
-            }
+                reloadDocument(data);
+            };
+
+            history.replaceState({}, document.title, currentPageLoaded);
         }).fail(function () {
             reloadDocument('ERROR: resource ' + url + " not found.");
         });
     }
 
-    function onHashChange() {
-        var anchorMap = $.uriAnchor.makeAnchorMap();
-        var newPage = anchorMap.page;
+    function navigate(path) {
+        if (path !== currentPageLoaded) {
+            loadPage(path);
+            currentPageLoaded = path;
 
-        if (typeof newPage !== "undefined" && newPage !== currentPageLoaded) {
-            loadPage(newPage);
-            currentPageLoaded = newPage;
+            return true;
+        }
+        return false;
+    }
+
+    function navigatePush(path) {
+        if (navigate(path)) {
+            history.pushState({}, path, path);
+        }
+    }
+
+    function navigateReplace(path) {
+        if (navigate(path)) {
+            history.replaceState({}, path, path);
         }
     }
 
     initialize();
 
-    // TODO: bw compat with existing pages (graceful on non-tempates)
     // TODO: make sure styles are unloaded/reloaded correctly
     // TODO: nested templates
     // TODO: demo

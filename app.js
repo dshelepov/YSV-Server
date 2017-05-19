@@ -14,8 +14,7 @@ router.use(function (req, res, next) {
         && (req.url.endsWith(".html") || req.url.endsWith(".htm"))
         && req.url.toLowerCase() != FRAME_PAGE_PATH.toLowerCase()
     ) {
-        var redirectPage = req.url.startsWith('/') ? req.url.substr(1) : req.url;
-        res.redirect(FRAME_PAGE_PATH + "#!page=" + redirectPage);
+        res.redirect(FRAME_PAGE_PATH + "#!page=" + req.url);
     } else {
         next();
     }
